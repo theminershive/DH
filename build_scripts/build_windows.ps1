@@ -34,24 +34,24 @@ pip install pyinstaller==4.2
 pip install setuptools_scm
 
 Write-Output "   ---"
-Write-Output "Get CHIA_INSTALLER_VERSION"
-# The environment variable CHIA_INSTALLER_VERSION needs to be defined
-$env:CHIA_INSTALLER_VERSION = python .\build_scripts\installer-version.py -win
+Write-Output "Get DH_INSTALLER_VERSION"
+# The environment variable DH_INSTALLER_VERSION needs to be defined
+$env:DH_INSTALLER_VERSION = python .\build_scripts\installer-version.py -win
 
-if (-not (Test-Path env:CHIA_INSTALLER_VERSION)) {
-  $env:CHIA_INSTALLER_VERSION = '0.0.0'
-  Write-Output "WARNING: No environment variable CHIA_INSTALLER_VERSION set. Using 0.0.0"
+if (-not (Test-Path env:DH_INSTALLER_VERSION)) {
+  $env:DH_INSTALLER_VERSION = '0.0.0'
+  Write-Output "WARNING: No environment variable DH_INSTALLER_VERSION set. Using 0.0.0"
   }
-Write-Output "Chia Version is: $env:CHIA_INSTALLER_VERSION"
+Write-Output "DH Version is: $env:DH_INSTALLER_VERSION"
 Write-Output "   ---"
 
 Write-Output "   ---"
-Write-Output "Build chia-blockchain wheels"
+Write-Output "Build disk-hive wheels"
 Write-Output "   ---"
 pip wheel --use-pep517 --extra-index-url https://pypi.chia.net/simple/ -f . --wheel-dir=.\build_scripts\win_build .
 
 Write-Output "   ---"
-Write-Output "Install chia-blockchain wheels into venv with pip"
+Write-Output "Install Disk-Hive wheels into venv with pip"
 Write-Output "   ---"
 
 Write-Output "pip install miniupnpc"
@@ -60,20 +60,20 @@ pip install --no-index --find-links=.\win_build\ miniupnpc
 # Write-Output "pip install setproctitle"
 # pip install setproctitle==1.2.2
 
-Write-Output "pip install chia-blockchain"
-pip install --no-index --find-links=.\win_build\ chia-blockchain
+Write-Output "pip install disk-hive"
+pip install --no-index --find-links=.\win_build\ disk-hive
 
 Write-Output "   ---"
-Write-Output "Use pyinstaller to create chia .exe's"
+Write-Output "Use pyinstaller to create Disk-Hive .exe's"
 Write-Output "   ---"
-$SPEC_FILE = (python -c 'import chia; print(chia.PYINSTALLER_SPEC_PATH)') -join "`n"
+$SPEC_FILE = (python -c 'import DH; print(DH.PYINSTALLER_SPEC_PATH)') -join "`n"
 pyinstaller --log-level INFO $SPEC_FILE
 
 Write-Output "   ---"
-Write-Output "Copy chia executables to chia-blockchain-gui\"
+Write-Output "Copy Disk-Hive executables to disk-hive-gui\"
 Write-Output "   ---"
-Copy-Item "dist\daemon" -Destination "..\chia-blockchain-gui\" -Recurse
-Set-Location -Path "..\chia-blockchain-gui" -PassThru
+Copy-Item "dist\daemon" -Destination "..\disk-hive-gui\" -Recurse
+Set-Location -Path "..\disk-hive-gui" -PassThru
 
 git status
 
@@ -96,19 +96,19 @@ If ($LastExitCode -gt 0){
 }
 
 Write-Output "   ---"
-Write-Output "Increase the stack for chia command for (chia plots create) chiapos limitations"
+Write-Output "Increase the stack for DH command for (DH plots create) chiapos limitations"
 # editbin.exe needs to be in the path
-editbin.exe /STACK:8000000 daemon\chia.exe
+editbin.exe /STACK:8000000 daemon\DH.exe
 Write-Output "   ---"
 
-$packageVersion = "$env:CHIA_INSTALLER_VERSION"
-$packageName = "Chia-$packageVersion"
+$packageVersion = "$env:DH_INSTALLER_VERSION"
+$packageName = "DH-$packageVersion"
 
 Write-Output "packageName is $packageName"
 
 Write-Output "   ---"
 Write-Output "electron-packager"
-electron-packager . Chia --asar.unpack="**\daemon\**" --overwrite --icon=.\src\assets\img\chia.ico --app-version=$packageVersion
+electron-packager . Disk-Hive --asar.unpack="**\daemon\**" --overwrite --icon=.\src\assets\img\DH.ico --app-version=$packageVersion
 Write-Output "   ---"
 
 Write-Output "   ---"
@@ -122,8 +122,8 @@ If ($env:HAS_SECRET) {
    Write-Output "   ---"
    Write-Output "Add timestamp and verify signature"
    Write-Output "   ---"
-   signtool.exe timestamp /v /t http://timestamp.comodoca.com/ .\release-builds\windows-installer\ChiaSetup-$packageVersion.exe
-   signtool.exe verify /v /pa .\release-builds\windows-installer\ChiaSetup-$packageVersion.exe
+   signtool.exe timestamp /v /t http://timestamp.comodoca.com/ .\release-builds\windows-installer\DHSetup-$packageVersion.exe
+   signtool.exe verify /v /pa .\release-builds\windows-installer\DHSetup-$packageVersion.exe
    }   Else    {
    Write-Output "Skipping timestamp and verify signatures - no authorization to install certificates"
 }
